@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://challenges.cloudflare.com https://dont-lined-residential-described.trycloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>TerraVis Online Evaluation</title>
+  <meta name="description" content="Upload any generated image. TerraVis helps you identify 18 types of world-consistency violations across objects, interactions, and scenes, with an overall score and a breakdown of detected violations, supporting evidence and severity levels.">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#060a13" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#eef2f7" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="assets/brand/favicon.ico" sizes="32x32">
+  <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/console.css">
+  <script src="config.js"></script>
+  <script src="assets/js/theme-boot.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#evaluate">Skip to image evaluation</a>
+
+  <!-- Icon sprite (static, no data) -->
+  <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4 17l4.5-4.5 3.5 3.5 3-3 5 5"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 0 1-13.2 4.9M4.5 12a7.5 7.5 0 0 1 13.2-4.9M18 3.5v4h-4M6 20.5v-4h4"/></symbol>
+      <symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20.5 20.5M10.5 7.5v6M7.5 10.5h6"/></symbol>
+      <symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20.5 20.5M7.5 10.5h6"/></symbol>
+      <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M4.5 19.5h15"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="1.6"/><path d="M15.5 5.5v-.5a1 1 0 0 0-1-1h-9.5a1 1 0 0 0-1 1v9.5a1 1 0 0 0 1 1h.5"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15"/></symbol>
+      <symbol id="i-paper" viewBox="0 0 24 24"><path d="M6.5 3.5h7.5l4.5 4.5v12.5h-12z"/><path d="M13.5 3.5v5h5M9 13h6M9 16.5h6"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.6 5.4 3.6 8.5s-1.1 5.9-3.6 8.5c-2.5-2.6-3.6-5.4-3.6-8.5s1.1-5.9 3.6-8.5z"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+      <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 4.5v15m0 0l-6-6m6 6l6-6"/></symbol>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4.5 12h15m0 0l-6-6m6 6l-6 6"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.3"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M13.5 4.5h6v6M19.5 4.5l-8.5 8.5M17.5 14v5.5h-13v-13H10"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></symbol>
+      <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4M4 12h16"/></symbol>
+      <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9.5 5.5L16 12l-6.5 6.5"/></symbol>
+      <symbol id="i-cat-abstract" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><rect x="12.5" y="12.5" width="8" height="8" rx="1"/><path d="M4 20l4-6.5 4 6.5z"/></symbol>
+      <symbol id="i-cat-symbolic" viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4.5c4-2 7 2 14 0v9c-7 2-10-2-14 0"/></symbol>
+      <symbol id="i-cat-info" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><rect x="7.5" y="12" width="3" height="5" rx=".6"/><rect x="12.5" y="8" width="3" height="9" rx=".6"/><rect x="17" y="10.5" width="2.5" height="6.5" rx=".6"/></symbol>
+      <symbol id="i-cat-interface" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M3 9h18M6 6.8h.01M8.5 6.8h.01"/></symbol>
+      <symbol id="i-cat-layout" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="10" rx="1.5"/><rect x="13" y="3.5" width="7.5" height="6" rx="1.5"/><rect x="13" y="11.5" width="7.5" height="9" rx="1.5"/><rect x="3.5" y="15.5" width="7.5" height="5" rx="1.5"/></symbol>
+      <symbol id="i-cat-micro" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="10" r="2.2"/><circle cx="15" cy="9" r="1.4"/><circle cx="14" cy="15" r="2.6"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="topbar" role="banner">
+    <div class="topbar__inner wrap">
+      <a class="brand" href="#top" aria-label="TerraVis home">
+        <img class="brand__logo brand__logo--light" src="assets/brand/terravis-logo.svg" alt="" width="113" height="32">
+        <img class="brand__logo brand__logo--dark" src="assets/brand/terravis-logo-dark.svg" alt="" width="113" height="32">
+      </a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="#evaluate">Evaluate</a>
+        <a href="#how">How it works</a>
+        <a href="#taxonomy">Taxonomy</a>
+        <a href="#faq">FAQ</a>
+        <a id="navCode" href="#" hidden>Code <svg class="icon icon--ext" aria-hidden="true" focusable="false"><use href="#i-external"/></svg></a>
+      </nav>
+      <div class="topbar__tools">
+        <span id="statusPill" class="status-pill" data-state="connecting" role="status" title="Checking the judge service">
+          <span class="led" aria-hidden="true"></span><span class="status-pill__text">Connecting</span>
+        </span>
+        <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to light theme">
+          <svg class="icon icon--sun" aria-hidden="true" focusable="false"><use href="#i-sun"/></svg>
+          <svg class="icon icon--moon" aria-hidden="true" focusable="false"><use href="#i-moon"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero wrap" id="top" aria-labelledby="heroTitle">
+      <div class="hero__copy">
+        <p class="eyebrow"><span class="eyebrow__idx">TerraVis</span> World-grounded visual consistency</p>
+        <h1 id="heroTitle" class="hero__title">Does your image <span class="hl">obey the world</span>?</h1>
+        <p class="hero__lede">
+          Upload any generated image. TerraVis helps you identify 18 types of world&#8209;consistency violations across objects,
+          interactions, and scenes. You get an overall score and a breakdown of detected violations, with supporting evidence
+          and severity levels.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="#evaluate" id="heroCta">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-upload"/></svg>
+            Evaluate an image
+          </a>
+          <a class="btn btn--ghost btn--lg" href="#examples">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-image"/></svg>
+            Browse examples
+          </a>
+        </div>
+        <dl class="hero__stats">
+          <div><dt>Stages</dt><dd class="mono">3</dd></div>
+          <div><dt>Violation probes</dt><dd class="mono">18</dd></div>
+          <div><dt>Score range</dt><dd class="mono">(0, 1]</dd></div>
+        </dl>
+      </div>
+      <figure class="hero__visual demo" aria-labelledby="heroLabel">
+        <div class="demo__nav">
+          <button type="button" class="icon-btn demo__step" id="heroPrev" aria-label="Previous example" hidden>
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-left"/></svg>
+          </button>
+          <span class="demo__label mono" id="heroLabel">Examples</span>
+          <button type="button" class="icon-btn demo__step" id="heroNext" aria-label="Next example" hidden>
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-right"/></svg>
+          </button>
+        </div>
+        <div class="hero-dial" id="heroDial"></div>
+        <div class="demo__card" id="heroCard"></div>
+      </figure>
+    </section>
+
+    <!-- EVALUATOR -->
+    <section class="section wrap" id="evaluate" aria-labelledby="evalTitle">
+      <header class="section__head">
+        <p class="section__idx mono">01</p>
+        <div>
+          <h2 id="evalTitle">Evaluate your image</h2>
+          <p class="section__sub">Drop, paste or browse an image (JPEG, PNG or WebP, up to <span class="js-max-mb">15</span>&nbsp;MB).</p>
+        </div>
+      </header>
+
+      <div class="console" id="console" data-phase="idle">
+        <p class="notice notice--warn service-note" id="serviceNote" role="status" hidden></p>
+        <!-- Specimen -->
+        <section class="panel specimen" aria-labelledby="specimenTitle">
+          <div class="panel__bar">
+            <h3 id="specimenTitle" class="panel__label">Specimen</h3>
+            <p class="specimen__meta mono" id="specimenMeta"></p>
+            <div class="badges" id="specimenBadges"></div>
+          </div>
+
+          <div class="viewer" id="viewer">
+            <button type="button" class="dropzone" id="dropzone" aria-describedby="dropHint">
+              <span class="dropzone__reticle" aria-hidden="true"></span>
+              <svg class="dropzone__icon" aria-hidden="true" focusable="false"><use href="#i-upload"/></svg>
+              <span class="dropzone__title">Drop an image, paste, or <u>browse</u></span>
+              <span class="dropzone__hint" id="dropHint"><span class="mono">JPEG · PNG · WebP</span> &middot; up to <span class="js-max-mb">15</span>&nbsp;MB &middot; <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>V</kbd> to paste</span>
+            </button>
+
+            <div class="viewer__stage" id="viewerStage" hidden tabindex="0" aria-label="Image preview. Use the mouse wheel or plus and minus keys to zoom, drag or arrow keys to pan, 0 to reset.">
+              <img id="viewerImg" alt="" draggable="false">
+              <div class="viewer__grid" aria-hidden="true"></div>
+              <div class="viewer__scan" aria-hidden="true"><span></span></div>
+              <span class="viewer__corner viewer__corner--tl" aria-hidden="true"></span>
+              <span class="viewer__corner viewer__corner--tr" aria-hidden="true"></span>
+              <span class="viewer__corner viewer__corner--bl" aria-hidden="true"></span>
+              <span class="viewer__corner viewer__corner--br" aria-hidden="true"></span>
+              <p class="viewer__hud mono" id="viewerHud" aria-hidden="true">STANDBY</p>
+            </div>
+
+            <div class="viewer__tools" id="viewerTools" hidden>
+              <button type="button" class="icon-btn icon-btn--sm" id="zoomOut" aria-label="Zoom out"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-zoom-out"/></svg></button>
+              <output class="mono viewer__zoom" id="zoomLabel" aria-live="off">100%</output>
+              <button type="button" class="icon-btn icon-btn--sm" id="zoomIn" aria-label="Zoom in"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-zoom-in"/></svg></button>
+              <button type="button" class="icon-btn icon-btn--sm" id="zoomReset" aria-label="Reset zoom"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-fit"/></svg></button>
+            </div>
+          </div>
+
+          <p class="specimen__caption" id="specimenCaption" hidden></p>
+          <p class="notice notice--error" id="uploadError" role="alert" hidden></p>
+          <div class="captcha" id="captcha" hidden></div>
+
+          <div class="specimen__actions">
+            <button type="button" class="btn btn--primary btn--sm" id="runBtn" hidden>
+              <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"/></svg> Evaluate
+            </button>
+            <button type="button" class="btn btn--ghost btn--sm" id="replaceBtn" hidden>
+              <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-image"/></svg> Replace image
+            </button>
+            <button type="button" class="btn btn--ghost btn--sm" id="cancelBtn" hidden>
+              <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-stop"/></svg> Cancel
+            </button>
+            <button type="button" class="btn btn--ghost btn--sm" id="anotherBtn" hidden>
+              <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg> New image
+            </button>
+            <p class="specimen__note" id="specimenNote">Sent to the judge only when you press Evaluate, and never stored.</p>
+          </div>
+        </section>
+
+        <!-- Readout -->
+        <section class="panel readout" aria-labelledby="readoutTitle">
+          <div class="panel__bar">
+            <h3 id="readoutTitle" class="panel__label">Readout</h3>
+            <span class="state-badge mono" id="stateBadge" data-state="idle"><span class="led" aria-hidden="true"></span><span class="state-badge__text">IDLE</span></span>
+          </div>
+
+          <ol class="stages" id="stageTrack" aria-label="Evaluation stages">
+            <li class="stage" data-stage="eligibility" data-state="pending"><span class="stage__num mono">1</span><span class="stage__name">Eligibility</span><span class="stage__meta mono">—</span><span class="stage__bar"><span></span></span></li>
+            <li class="stage" data-stage="detection" data-state="pending"><span class="stage__num mono">2</span><span class="stage__name">Detection</span><span class="stage__meta mono">0/18</span><span class="stage__bar"><span></span></span></li>
+            <li class="stage" data-stage="severity" data-state="pending"><span class="stage__num mono">3</span><span class="stage__name">Severity</span><span class="stage__meta mono">—</span><span class="stage__bar"><span></span></span></li>
+            <li class="stage" data-stage="score" data-state="pending"><span class="stage__num mono">S</span><span class="stage__name">Score</span><span class="stage__meta mono">—</span><span class="stage__bar"><span></span></span></li>
+          </ol>
+
+          <div class="gauge">
+            <div class="dial" id="dial"></div>
+            <dl class="counts" id="counts">
+              <div class="count count--major"><dt>Major</dt><dd class="mono" id="countMajor">—</dd></div>
+              <div class="count count--minor"><dt>Minor</dt><dd class="mono" id="countMinor">—</dd></div>
+              <div class="count count--clear"><dt>Clear</dt><dd class="mono" id="countClear">—</dd></div>
+              <div class="count count--unclear"><dt>Unparsed <span class="tip" tabindex="0" role="img" aria-label="Unparsed: the judge’s answer could not be read; counted as not detected." data-tip="The judge’s answer could not be read; counted as not detected.">?</span></dt><dd class="mono" id="countUnclear">—</dd></div>
+            </dl>
+          </div>
+
+          <p class="summary" id="summaryLine">Load an image to begin.</p>
+          <div class="scale" id="scale" hidden></div>
+          <div class="formula mono" id="formula" aria-label="Score formula"></div>
+
+          <div class="log" aria-label="Live progress">
+            <p class="log__head mono"><span>Live progress</span><span id="logClock">00:00.0</span></p>
+            <ol class="log__list mono" id="log"></ol>
+          </div>
+
+        </section>
+      </div>
+
+      <!-- Probe panel -->
+      <section class="panel probes" id="probesPanel" data-final="" aria-labelledby="probesTitle">
+        <div class="panel__bar">
+          <h3 id="probesTitle" class="panel__label">Violation probes <span class="mono dim">18</span></h3>
+          <ul class="legend" aria-label="Legend">
+            <li data-state="pending">Pending</li>
+            <li data-state="checking">Checking</li>
+            <li data-state="clear">Clear</li>
+            <li data-state="minor">Minor</li>
+            <li data-state="major">Major</li>
+            <li data-state="unclear">Unparsed</li>
+          </ul>
+          <button type="button" class="btn btn--ghost btn--sm probes__toggle" id="probesToggle" aria-controls="probes" aria-expanded="false">Show all 18 checks</button>
+        </div>
+        <div class="probes__grid" id="probes"></div>
+        <p class="probes__skipped">No probe was run: the eligibility stage gave no score, so the 18 checks were skipped.</p>
+      </section>
+
+      <!-- Findings -->
+      <section class="findings" id="findings" aria-labelledby="findingsTitle">
+        <div class="findings__head">
+          <h3 id="findingsTitle">Findings</h3>
+          <p class="findings__elig" id="eligLine"></p>
+        </div>
+        <div id="findingsBody" class="findings__body"></div>
+      </section>
+
+      <!-- Examples -->
+      <section class="sub" id="examples" aria-labelledby="examplesTitle">
+        <div class="sub__head">
+          <h3 id="examplesTitle">Examples <span class="badge badge--pre">Precomputed</span></h3>
+          <p class="sub__note">Scored offline with the same judge. Opening one replays its stored result.</p>
+        </div>
+        <ul class="examples" id="exampleList"></ul>
+      </section>
+
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section wrap" id="how" aria-labelledby="howTitle">
+      <header class="section__head">
+        <p class="section__idx mono">02</p>
+        <div>
+          <h2 id="howTitle">How it works</h2>
+          <p class="section__sub">Three stages, each a small, checkable question to the judge. The score only counts what was actually found.</p>
+        </div>
+      </header>
+
+      <ol class="flow">
+        <li class="flow__step">
+          <p class="flow__num mono">Stage 1</p>
+          <h3>Eligibility</h3>
+          <p>Is this a single-frame, representational image of identifiable macroscopic objects or scenes? Photorealistic and stylized images both count.</p>
+          <div class="flow__viz flow__viz--gate" aria-hidden="true">
+            <span class="gate gate--ok mono">Eligible</span>
+            <span class="gate gate--na mono">N/A &rarr; no score</span>
+          </div>
+          <p class="flow__foot mono">1 query</p>
+        </li>
+        <li class="flow__step">
+          <p class="flow__num mono">Stage 2</p>
+          <h3>Violation detection</h3>
+          <p>18 yes/no probes run in parallel. Each &ldquo;yes&rdquo; names the affected aspect and one sentence of visible evidence.</p>
+          <div class="flow__viz flow__viz--cells" aria-hidden="true" id="flowCells"></div>
+          <p class="flow__foot mono">18 parallel queries</p>
+        </li>
+        <li class="flow__step">
+          <p class="flow__num mono">Stage 3</p>
+          <h3>Severity</h3>
+          <p><strong>Major</strong> if it affects the main subject, a foreground object or the central event; <strong>minor</strong> if it is background or peripheral.</p>
+          <div class="flow__viz flow__viz--sev" aria-hidden="true">
+            <span class="pill pill--major mono">Major</span>
+            <span class="pill pill--minor mono">Minor</span>
+          </div>
+          <p class="flow__foot mono">1 query per detection</p>
+        </li>
+        <li class="flow__step flow__step--score">
+          <p class="flow__num mono">Score</p>
+          <h3>Aggregation</h3>
+          <p class="formula-big mono"><span class="f-row">S = exp(&minus;&lambda; &middot;</span><span class="f-row">&nbsp;&nbsp;(N<sub>major</sub> + &alpha; &middot; N<sub>minor</sub>))</span></p>
+          <p class="flow__params mono"><span>&lambda; = <b class="js-lambda">1.0</b></span><span>&alpha; = <b class="js-alpha">0.5</b></span></p>
+          <p class="flow__foot mono">range (0, 1] &middot; 1 = no violations</p>
+        </li>
+      </ol>
+
+      <div class="calc panel">
+        <div class="calc__intro">
+          <h3>Score ladder</h3>
+          <p>Each major violation multiplies the score by <span class="mono">e<sup>&minus;&lambda;</sup></span>, each minor one by <span class="mono">e<sup>&minus;&lambda;&alpha;</sup></span>. Every score corresponds to a count, so read results as counts.</p>
+          <div class="calc__ctl" role="group" aria-label="Score calculator">
+            <div class="stepper">
+              <span class="stepper__label" id="calcMajorLabel">N<sub>major</sub></span>
+              <button type="button" class="icon-btn icon-btn--sm" data-calc="major" data-delta="-1" aria-label="Fewer major violations">&minus;</button>
+              <output class="mono" id="calcMajor" aria-labelledby="calcMajorLabel">1</output>
+              <button type="button" class="icon-btn icon-btn--sm" data-calc="major" data-delta="1" aria-label="More major violations">+</button>
+            </div>
+            <div class="stepper">
+              <span class="stepper__label" id="calcMinorLabel">N<sub>minor</sub></span>
+              <button type="button" class="icon-btn icon-btn--sm" data-calc="minor" data-delta="-1" aria-label="Fewer minor violations">&minus;</button>
+              <output class="mono" id="calcMinor" aria-labelledby="calcMinorLabel">1</output>
+              <button type="button" class="icon-btn icon-btn--sm" data-calc="minor" data-delta="1" aria-label="More minor violations">+</button>
+            </div>
+            <p class="calc__out mono" aria-live="polite"><span id="calcExpr"></span> = <b id="calcScore">0.223</b></p>
+          </div>
+        </div>
+        <div class="calc__viz">
+          <ol class="ladder" id="ladder" aria-label="Scores for common violation counts"></ol>
+          <div class="calc__plot" id="calcPlot"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAXONOMY -->
+    <section class="section wrap" id="taxonomy" aria-labelledby="taxTitle">
+      <header class="section__head">
+        <p class="section__idx mono">03</p>
+        <div>
+          <h2 id="taxTitle">The 18 violation types</h2>
+          <p class="section__sub">TerraVis breaks world consistency into three levels: 7 object-level, 8 interaction-level and 3 scene-level violation types. Each type is one probe in the detection stage.</p>
+        </div>
+      </header>
+      <div class="tax__controls">
+        <div class="seg" role="group" aria-label="Filter by domain" id="taxFilter">
+          <button type="button" aria-pressed="true" data-domain="all">All <span class="mono">18</span></button>
+          <button type="button" aria-pressed="false" data-domain="object-level">Object <span class="mono">7</span></button>
+          <button type="button" aria-pressed="false" data-domain="interaction-level">Interaction <span class="mono">8</span></button>
+          <button type="button" aria-pressed="false" data-domain="scene-level">Scene <span class="mono">3</span></button>
+        </div>
+        <label class="search">
+          <span class="visually-hidden">Search the violation types</span>
+          <input type="search" id="taxSearch" placeholder="Search (e.g. shadow, hovering)" autocomplete="off">
+        </label>
+      </div>
+      <div class="tax" id="taxList"></div>
+      <p class="tax__empty" id="taxEmpty" hidden>No violation type matches that search.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section wrap" id="faq" aria-labelledby="faqTitle">
+      <header class="section__head">
+        <p class="section__idx mono">04</p>
+        <div>
+          <h2 id="faqTitle">Questions, privacy &amp; limitations</h2>
+        </div>
+      </header>
+      <div class="faq">
+        <details open>
+          <summary>What does TerraVis measure?</summary>
+          <p>World-grounded visual consistency (world consistency for short): whether what the image depicts could exist in the physical world. That covers plausible object identity and structure, anatomy, surfaces and legible markings; physically sound contact, support, motion, media, optics, energy and thermal responses; and coherent relative scale, occlusion and region continuity. It evaluates both photorealistic and stylized images based on visual content alone. Characteristics inherent to stylized images, such as simplified textures, flat colors, and schematic lighting, are not considered violations in themselves.</p>
+        </details>
+        <details>
+          <summary>How do I read the score?</summary>
+          <p><span class="mono">S = exp(&minus;&lambda;&middot;(N<sub>major</sub> + &alpha;&middot;N<sub>minor</sub>))</span> with <span class="mono">&lambda; = 1.0</span> and <span class="mono">&alpha; = 0.5</span>. <span class="mono">1.000</span> means none of the 18 probes found a violation; one minor violation gives <span class="mono">0.607</span>, one major (or two minor) <span class="mono">0.368</span>, one major plus one minor <span class="mono">0.223</span>. Each score maps back to violation counts, so compare results by those counts.</p>
+        </details>
+        <details>
+          <summary>Why did my image get &ldquo;Not applicable&rdquo;?</summary>
+          <p>TerraVis only scores single-frame representational images of macroscopic objects or scenes. The judge marks an image N/A when its primary content is one of:</p>
+          <ul class="na-list" id="faqNaList"></ul>
+          <p>A physical object that happens to show text, a map or a menu (a sign in a street, a book on a table) is still eligible.</p>
+        </details>
+        <details>
+          <summary>What does &ldquo;Undetermined&rdquo; or &ldquo;Unparsed&rdquo; mean?</summary>
+          <p><strong>Undetermined</strong>: the judge&rsquo;s eligibility answer could not be parsed after 3 attempts, so no score is given. <strong>Unparsed</strong> on a single probe: that one answer could not be read and is counted as not detected.</p>
+        </details>
+        <details>
+          <summary>Is my image stored?</summary>
+          <p>No. Your image is held in memory only while it is queued and judged, and is never written to disk. The result, keyed by a hash of the file, stays in the server&rsquo;s memory for about 3 minutes, so this page can reconnect if your connection drops and an identical re-upload gets the same result back; then it is discarded.</p>
+        </details>
+        <details>
+          <summary>Can TerraVis tell whether an image is AI-generated?</summary>
+          <p>No. TerraVis is a research metric for the physical and commonsense plausibility of an image, not a forensic or deepfake detector. A real photograph can receive findings, and a generated image can receive none.</p>
+        </details>
+        <details>
+          <summary>Limitations</summary>
+          <ul>
+            <li>The judge can be wrong: it can miss subtle violations and flag things that are fine. Read the evidence sentences, not just the number.</li>
+            <li>TerraVis is a research metric for world consistency. It is <strong>not</strong> a forensic or deepfake detector and says nothing about whether an image is real or generated.</li>
+            <li>Each probe reports at most one instance (the most salient), so several distortions of the same type count once.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="wrap footer__inner">
+      <div class="footer__brand">
+        <span class="brand__name">TerraVis</span>
+        <p>World-grounded visual consistency evaluation for generated images. Results come from an AI judge and can be wrong.</p>
+      </div>
+      <ul class="footer__links" id="footerLinks"></ul>
+      <div class="footer__meta">
+        <p>&copy; 2026 TerraVis authors<span id="footerIssues" hidden> &middot; <a target="_blank" rel="noopener">Report an issue</a></span></p>
+        <p class="mono" id="footerMeta">Judge: google/gemma-4-31B-it</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="drop-overlay" id="dropOverlay" hidden aria-hidden="true">
+    <div class="drop-overlay__box">
+      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-upload"/></svg>
+      <p>Drop the image to load it</p>
+      <p class="mono">JPEG · PNG · WebP</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <div class="visually-hidden" id="srLive" aria-live="polite" aria-atomic="true"></div>
+  <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" hidden>
+</body>
+</html>
