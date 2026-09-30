@@ -6,7 +6,7 @@
 window.TERRAVIS_CONFIG = {
   apiBase: "https://dont-lined-residential-described.trycloudflare.com",            // "" = same origin; "https://api.example.org" = remote; "mock" = built-in simulator
   paperUrl: "",           // empty → hide the link
-  codeUrl: "",            // the TerraVis code; empty until that repository is public (a private one 404s for visitors)
+  codeUrl: "https://github.com/ShyFoo/TerraVis",  // the TerraVis code (404 for visitors until it is public)
   issuesUrl: "https://github.com/ShyFoo/TerraVis-web/issues",  // footer "Report an issue"; empty -> <codeUrl>/issues
   projectUrl: "",
   turnstileSiteKey: "",   // Cloudflare Turnstile; empty → no captcha widget
