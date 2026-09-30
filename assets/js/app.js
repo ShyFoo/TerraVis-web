@@ -13,7 +13,7 @@ import {
 
 // ---------- configuration ----------
 const CFG = Object.assign(
-  { apiBase: "", paperUrl: "", codeUrl: "", projectUrl: "", turnstileSiteKey: "" },
+  { apiBase: "", paperUrl: "", codeUrl: "", issuesUrl: "", projectUrl: "", turnstileSiteKey: "" },
   window.TERRAVIS_CONFIG || {},
 );
 const params = new URLSearchParams(window.location.search);
@@ -746,6 +746,7 @@ function resumeActiveJob() {
 
 // ---------- boot ----------
 function boot() {
+  if (window.__terravisFramed) return;  // inside another site's frame (theme-boot.js hid the page)
   buildFlowCells($("#flowCells"));
   buildLadder($("#ladder"), {
     major: $("#calcMajor"), minor: $("#calcMinor"), expr: $("#calcExpr"), score: $("#calcScore"),

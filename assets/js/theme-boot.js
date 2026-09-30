@@ -4,7 +4,8 @@
 (function () {
   if (window.top !== window.self) {
     document.documentElement.hidden = true;
-    try { window.top.location.replace(window.location.href); } catch (e) { /* sandboxed: stay hidden */ }
+    window.__terravisFramed = true;  // app.js does not start either
+    try { window.top.location.replace(window.location.href); } catch (e) { /* blocked (sandbox or framebusting intervention): stay hidden */ }
     return;
   }
   var theme = null;

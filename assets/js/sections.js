@@ -365,7 +365,10 @@ export function buildLinks(cfg, { footer, navCode, issues }) {
     navCode.target = "_blank";
     navCode.rel = "noopener";
     navCode.hidden = false;
-    issues.querySelector("a").href = `${cfg.codeUrl.replace(/\/+$/, "")}/issues`;
+  }
+  const issuesUrl = cfg.issuesUrl || (isHttpUrl(cfg.codeUrl) ? `${cfg.codeUrl.replace(/\/+$/, "")}/issues` : "");
+  if (isHttpUrl(issuesUrl)) {
+    issues.querySelector("a").href = issuesUrl;
     issues.hidden = false;
   }
 }
