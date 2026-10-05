@@ -40,6 +40,7 @@
 .status-pill[data-state="degraded"] .led { --c: var(--minor); }
 .status-pill[data-state="offline"] .led { --c: var(--major); }
 .status-pill[data-state="sim"] .led { --c: var(--unclear); }
+.status-pill[data-state="closed"] .led { --c: var(--text-3); }
 .status-pill[data-state="connecting"] .led { --c: var(--text-3); animation: pulse 1.2s infinite; }
 
 #themeToggle .icon--sun { display: none; }

@@ -18,6 +18,8 @@ const CFG = Object.assign(
 );
 const params = new URLSearchParams(window.location.search);
 const MOCK = params.has("mock") || String(CFG.apiBase || "").trim().toLowerCase() === "mock";
+// apiBase "closed" (tools/publish_site.py --closed): online evaluation is switched off; the page sends no API requests.
+const CLOSED = !MOCK && String(CFG.apiBase || "").trim().toLowerCase() === "closed";
 const SPEED = clamp(parseFloat(params.get("speed")) || 1, 0.1, 50);
 const AUTORUN = params.get("autorun");
 const MOCK_ERROR = MOCK ? (params.get("mockerror") || "").trim() : "";
@@ -278,7 +280,7 @@ async function loadFile(file, { exampleId = null, autorun = false, focusRun = tr
 
 // ---------- captcha (only when a site key is configured) ----------
 function captchaKey() {
-  return MOCK ? "" : String(CFG.turnstileSiteKey || info.turnstile_site_key || "");
+  return MOCK || CLOSED ? "" : String(CFG.turnstileSiteKey || info.turnstile_site_key || "");
 }
 function ensureCaptcha() {
   const key = captchaKey();
@@ -315,6 +317,7 @@ async function startEvaluation() {
   const item = S.item;
   if (!item || !item.file || isBusy()) return;
   hideUploadError();
+  if (CLOSED) { failRun(new ApiError("closed")); return; }
   if (!MOCK && navigator.onLine === false) { failRun(new ApiError("offline")); return; }
   const key = captchaKey();
   if (key && !captcha.token) {
@@ -461,6 +464,7 @@ function friendly(e) {
     rate_limited: ["Slow down a little", "You’ve submitted several images in a short time.", true],
     too_many_active: ["One at a time", "You already have evaluations in progress. Let them finish first.", true],
     busy: ["The judge is at capacity", "The queue is full right now. Please try again shortly.", true],
+    closed: ["Online evaluation is closed", "Evaluating your own images isn’t available right now. The precomputed examples below show what a result looks like.", false],
     judge_offline: ["Judge offline", "The evaluation model is temporarily offline. Please try again later.", true],
     judge_unavailable: ["Judge unavailable", "The judge became unavailable during this evaluation.", true],
     judge_error: ["The judge ran into an error", "The model returned an error while evaluating this image.", true],
@@ -676,6 +680,7 @@ syncThemeButton();
 
 // ---------- status pill ----------
 const SERVICE_NOTES = {
+  closed: "Online evaluation is closed for now. The precomputed examples below still open.",
   device: "You’re offline. The precomputed examples below still open; reconnect to evaluate your own image.",
   degraded: "The judge model is temporarily offline, so new evaluations will fail for now. The precomputed examples below still open.",
   offline: "The evaluation service can’t be reached right now. The precomputed examples below still open; try your own image again in a few minutes.",
@@ -691,6 +696,7 @@ function setPill(state, text, title, note = "") {
 
 async function refreshHealth() {
   if (MOCK) { setPill("sim", "Simulator", "Built-in simulator: no requests leave this browser."); return; }
+  if (CLOSED) { setPill("closed", "Closed", "Online evaluation is switched off.", SERVICE_NOTES.closed); return; }
   if (navigator.onLine === false) { setPill("offline", "No network", "Your device is offline.", SERVICE_NOTES.device); return; }
   try {
     const hl = await api.health();
@@ -725,7 +731,7 @@ function applyInfo() {
 
 // ---------- reconnect after reload ----------
 function resumeActiveJob() {
-  if (MOCK) return false;
+  if (MOCK || CLOSED) return false;
   const job = store.loadActiveJob();
   if (!job) return false;
   const preview = typeof job.preview === "string" && job.preview.startsWith("data:image/") ? job.preview : "";
@@ -757,11 +763,12 @@ function boot() {
   buildLinks(CFG, { footer: $("#footerLinks"), navCode: $("#navCode"), issues: $("#footerIssues") });
   applyInfo();
   if (MOCK) el.note.textContent = "Simulator mode: nothing is uploaded; results come from stored examples.";
+  else if (CLOSED) el.note.textContent = "Online evaluation is closed for now: nothing is uploaded.";
   syncButtons();
   refreshHealth();
   const resumed = resumeActiveJob();
 
-  api.info()
+  if (!CLOSED) api.info()
     .then((i) => {
       if (i && typeof i === "object") {
         info = { ...info, ...i };
